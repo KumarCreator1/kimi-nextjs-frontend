@@ -33,3 +33,16 @@ export const authApi = {
 
   getCurrentUser: () => api.get("/user/me"),
 };
+
+export const classApi = {
+  getUserClasses: () => api.get("/class"),
+  createClass: (classData) => api.post("/class", classData),
+  getClassDetail: (classId) => api.get(`/class/${classId}`),
+  updateClass: (classId, classData) =>
+    api.patch(`/class/${classId}`, classData),
+  deleteClass: (classId) => api.delete(`/class/${classId}`),
+  addMember: (classId, email) =>
+    api.post(`/class/${classId}/member`, { email }),
+  removeMember: (classId, memberId) =>
+    api.delete(`/class/${classId}/member/${memberId}`),
+};
