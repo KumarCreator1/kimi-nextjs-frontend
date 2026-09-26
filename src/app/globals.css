@@ -11,7 +11,10 @@
   --muted-foreground: #77716a;
   --border: #ddd6ca;
   --sage: #dce5d8;
+  --sage-dark: #617359;
   --ochre: #eadbbd;
+  --ochre-dark: #967c43;
+  --error: #a25a4d;
   --ink: #292725;
   --radius: 9px;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { subjectApi, documentApi } from "@/lib/api";
+import { subjectApi, documentApi, classApi } from "@/lib/api";
 import SubjectDetailHeader from "./SubjectDetailHeader";
 import DocumentGrid from "./DocumentGrid";
 import { useAuth } from "@/context/AuthContext";
@@ -10,6 +10,7 @@ export default function SubjectDetailContent({ classId, subjectId }) {
   const { user } = useAuth();
   const [subjectData, setSubjectData] = useState(null);
   const [documents, setDocuments] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -17,12 +18,14 @@ export default function SubjectDetailContent({ classId, subjectId }) {
     if (!silent) setIsLoading(true);
     if (!silent) setError(null);
     try {
-      const [subjectRes, docRes] = await Promise.all([
+      const [subjectRes, docRes, classRes] = await Promise.all([
         subjectApi.getSubjectDetail(classId, subjectId),
-        documentApi.listDocuments(classId, subjectId)
+        documentApi.listDocuments(classId, subjectId),
+        classApi.getClassDetail(classId),
       ]);
       setSubjectData(subjectRes.data?.subject);
       setDocuments(docRes.data?.documents || []);
+      setIsAdmin(classRes.data?.role === "admin");
     } catch (err) {
       if (!silent) setError(err.message || "Failed to load subject details");
     } finally {
@@ -60,13 +63,14 @@ export default function SubjectDetailContent({ classId, subjectId }) {
       <div className="space-y-12">
         <SubjectDetailHeader 
           subjectData={subjectData} 
-          documentCount={documents.length} 
+          documents={documents}
         />
         <DocumentGrid 
           classId={classId}
           subjectId={subjectId}
           documents={documents}
           onRefresh={fetchData}
+          isAdmin={isAdmin}
         />
       </div>
     </main>

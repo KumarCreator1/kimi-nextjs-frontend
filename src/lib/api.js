@@ -56,12 +56,8 @@ export const subjectApi = {
 };
 
 export const documentApi = {
-  uploadDocument: (classId, subjectId, formData) => 
-    api.post(`/class/${classId}/subject/${subjectId}/document`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    }),
+  uploadDocument: (classId, subjectId, data) => 
+    api.post(`/class/${classId}/subject/${subjectId}/document`, data),
   listDocuments: (classId, subjectId) => 
     api.get(`/class/${classId}/subject/${subjectId}/document?subjectId=${subjectId}`),
   getDocumentDetail: (classId, subjectId, documentId) => 
@@ -71,7 +67,9 @@ export const documentApi = {
   downloadDocument: (classId, subjectId, documentId) => 
     api.get(`/class/${classId}/subject/${subjectId}/document/${documentId}/download`),
   checkConversionStatus: (classId, subjectId, documentId) => 
-    api.get(`/class/${classId}/subject/${subjectId}/document/${documentId}/conversion-status`),
+    api.get(`/class/${classId}/subject/${subjectId}/document/${documentId}/sync`),
   enrichDocument: (classId, subjectId, documentId) => 
-    api.post(`/class/${classId}/subject/${subjectId}/document/${documentId}/enrich`)
+    api.post(`/class/${classId}/subject/${subjectId}/document/${documentId}/enrich`),
+  deleteDocument: (classId, subjectId, documentId) =>
+    api.delete(`/class/${classId}/subject/${subjectId}/document/${documentId}`),
 };
