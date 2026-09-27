@@ -7,17 +7,16 @@ import {
   Image as ImageIcon,
   Sparkles,
   AlertCircle,
-  Download,
+  ExternalLink,
   Loader2,
   RefreshCw,
   CheckCircle2,
-  Hash,
   Clock,
   XCircle,
   Trash2,
 } from "lucide-react";
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatBytes(bytes) {
   if (!bytes) return null;
@@ -35,29 +34,29 @@ function formatDate(dateStr) {
   });
 }
 
-// ── Status pill ───────────────────────────────────────────────────────────────
+// ── Status badge ──────────────────────────────────────────────────────────────
 
-function StatusPill({ status, isAiEnriched }) {
+function StatusBadge({ status, isAiEnriched }) {
   if (status === "converting") {
     return (
-      <span className="status processing flex items-center gap-1 text-[11px] font-medium">
-        <Loader2 size={11} className="animate-spin" />
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full text-[var(--ochre-dark)]" style={{background:'#f0e3c8'}}>
+        <Loader2 size={12} className="animate-spin" />
         AI Processing…
       </span>
     );
   }
   if (status === "failed") {
     return (
-      <span className="status failed flex items-center gap-1 text-[11px] font-medium">
-        <XCircle size={11} />
-        Failed
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full text-[var(--error)]" style={{background:'var(--error-bg)', border:'1px solid var(--error-border)'}}>
+        <XCircle size={12} />
+        Processing Failed
       </span>
     );
   }
   if (status === "ready" || isAiEnriched) {
     return (
-      <span className="status ready flex items-center gap-1 text-[11px] font-medium">
-        <CheckCircle2 size={11} />
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full bg-[var(--sage)] text-[var(--sage-dark)]">
+        <CheckCircle2 size={12} />
         AI Ready
       </span>
     );
@@ -65,54 +64,60 @@ function StatusPill({ status, isAiEnriched }) {
   return null;
 }
 
-// ── Skeleton shimmer for "converting" state ───────────────────────────────────
+// ── Skeleton card for "converting" state ──────────────────────────────────────
 
-function DocumentRowSkeleton({ name, mimeType, onDelete, classId, subjectId, docId, onSync }) {
+function DocumentCardSkeleton({ name, mimeType, onSync }) {
   const isImage = mimeType?.startsWith("image/");
   const Icon = isImage ? ImageIcon : FileText;
 
   return (
-    <div className="document-row group select-none cursor-default opacity-80">
-      <div className="doc-icon">
-        <Icon size={18} />
-      </div>
-
-      <div className="doc-details flex-1 min-w-0">
-        <p className="text-sm font-medium text-[var(--ink)] truncate">{name}</p>
-        <div className="flex items-center gap-3 mt-1">
-          <StatusPill status="converting" />
-          <span className="text-[11px] text-[var(--muted-foreground)] flex items-center gap-1">
-            <Clock size={10} />
-            Gemini is reading your document…
-          </span>
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 flex flex-col gap-4 opacity-80">
+      {/* Header */}
+      <div className="flex items-start gap-3">
+        <div className="shrink-0 w-10 h-10 rounded-lg bg-[var(--muted)] flex items-center justify-center text-[var(--primary)]">
+          <Icon size={20} />
         </div>
-        {/* Animated shimmer bars mimicking AI content */}
-        <div className="mt-3 space-y-2">
-          <div className="h-2 rounded-full bg-[var(--muted)] animate-pulse w-3/4" />
-          <div className="h-2 rounded-full bg-[var(--muted)] animate-pulse w-1/2" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-[var(--ink)] leading-snug truncate">{name}</p>
+          <div className="mt-1.5">
+            <StatusBadge status="converting" />
+          </div>
         </div>
       </div>
 
-      <button
-        onClick={onSync}
-        className="shrink-0 text-button text-[11px] flex items-center gap-1 hover:text-[var(--ink)] transition-colors"
-        title="Check status"
-      >
-        <RefreshCw size={12} />
-        Sync
-      </button>
+      {/* Shimmer content blocks */}
+      <div className="space-y-2.5 pt-1">
+        <div className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
+          <Clock size={12} />
+          <span>Gemini is reading and analysing your document…</span>
+        </div>
+        <div className="h-2.5 rounded-full bg-[var(--muted)] animate-pulse w-full" />
+        <div className="h-2.5 rounded-full bg-[var(--muted)] animate-pulse w-5/6" />
+        <div className="h-2.5 rounded-full bg-[var(--muted)] animate-pulse w-3/4" />
+      </div>
+
+      {/* Footer */}
+      <div className="pt-2 border-t border-[var(--border)] flex justify-end">
+        <button
+          onClick={onSync}
+          className="button button-light !min-h-0 !py-1.5 !px-3 text-xs flex items-center gap-1.5"
+        >
+          <RefreshCw size={12} />
+          Check Status
+        </button>
+      </div>
     </div>
   );
 }
 
-// ── Main DocumentRow ──────────────────────────────────────────────────────────
+// ── Main DocumentCard ─────────────────────────────────────────────────────────
 
 export default function DocumentCard({ doc, classId, subjectId, onRefresh, isAdmin }) {
   const [isRetrying, setIsRetrying] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
   const [localError, setLocalError] = useState(null);
-  const [isExpanded, setIsExpanded] = useState(false);
   const pollingRef = useRef(null);
   const confirmTimerRef = useRef(null);
 
@@ -124,12 +129,17 @@ export default function DocumentCard({ doc, classId, subjectId, onRefresh, isAdm
           await documentApi.checkConversionStatus(classId, subjectId, doc.id);
           if (onRefresh) onRefresh(true);
         } catch {
-          // silent — no toast spam during polling
+          // silent
         }
       }, 4000);
     }
     return () => clearInterval(pollingRef.current);
   }, [doc.status, doc.id, classId, subjectId, onRefresh]);
+
+  // Cleanup confirm timer on unmount
+  useEffect(() => {
+    return () => clearTimeout(confirmTimerRef.current);
+  }, []);
 
   const handleSync = async () => {
     try {
@@ -139,36 +149,6 @@ export default function DocumentCard({ doc, classId, subjectId, onRefresh, isAdm
       // silent
     }
   };
-
-  // Two-step delete: first click arms it (3s window), second click confirms.
-  const handleDeleteClick = () => {
-    if (!confirmDelete) {
-      setConfirmDelete(true);
-      // Auto-disarm after 3 seconds if user doesn't confirm
-      confirmTimerRef.current = setTimeout(() => setConfirmDelete(false), 3000);
-    } else {
-      clearTimeout(confirmTimerRef.current);
-      handleDeleteConfirm();
-    }
-  };
-
-  const handleDeleteConfirm = async () => {
-    setIsDeleting(true);
-    setLocalError(null);
-    try {
-      await documentApi.deleteDocument(classId, subjectId, doc.id);
-      if (onRefresh) onRefresh(true); // silent refresh removes the row
-    } catch (err) {
-      setLocalError(err.message || "Delete failed");
-      setIsDeleting(false);
-      setConfirmDelete(false);
-    }
-  };
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => clearTimeout(confirmTimerRef.current);
-  }, []);
 
   const handleRetry = async () => {
     setIsRetrying(true);
@@ -183,15 +163,36 @@ export default function DocumentCard({ doc, classId, subjectId, onRefresh, isAdm
     }
   };
 
+  // Two-step delete: first click arms, second confirms
+  const handleDeleteClick = () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      confirmTimerRef.current = setTimeout(() => setConfirmDelete(false), 3000);
+    } else {
+      clearTimeout(confirmTimerRef.current);
+      handleDeleteConfirm();
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
+    setLocalError(null);
+    try {
+      await documentApi.deleteDocument(classId, subjectId, doc.id);
+      if (onRefresh) onRefresh(true);
+    } catch (err) {
+      setLocalError(err.message || "Delete failed");
+      setIsDeleting(false);
+      setConfirmDelete(false);
+    }
+  };
+
   // Skeleton while converting
   if (doc.status === "converting") {
     return (
-      <DocumentRowSkeleton
+      <DocumentCardSkeleton
         name={doc.documentName}
         mimeType={doc.mimeType}
-        classId={classId}
-        subjectId={subjectId}
-        docId={doc.id}
         onSync={handleSync}
       />
     );
@@ -202,168 +203,162 @@ export default function DocumentCard({ doc, classId, subjectId, onRefresh, isAdm
   const hasAiData = doc.isAiEnriched || doc.status === "ready";
   const displayTitle = doc.aiTitle || doc.documentName;
   const topics = Array.isArray(doc.topics) ? doc.topics : [];
-  const hashtags = Array.isArray(doc.hashtags) ? doc.hashtags : [];
   const sizeStr = formatBytes(doc.fileSize);
   const dateStr = formatDate(doc.createdAt);
-  const hasExpandable = hasAiData && (doc.aiSummary || topics.length > 0);
 
   return (
-    <div
-      className={`document-row group flex-col !items-start !gap-0 transition-all duration-200 ${
-        hasAiData ? "hover:bg-[#fffdf8]" : ""
-      } ${isExpanded ? "!bg-[#fffdf8]" : ""}`}
-    >
-      {/* ── Top row ── */}
-      <div className="flex items-start gap-4 w-full">
-        <div className="doc-icon shrink-0 mt-0.5">
-          <Icon size={18} />
+    <div className="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-hidden flex flex-col transition-shadow hover:shadow-md">
+
+      {/* ── Card header ── */}
+      <div className="p-5 pb-3 flex items-start gap-3">
+        {/* File type icon */}
+        <div className="shrink-0 w-12 h-12 rounded-xl bg-[var(--muted)] flex items-center justify-center text-[var(--primary)]">
+          <Icon size={24} />
         </div>
 
-        <div className="flex-1 min-w-0">
-          {/* Title */}
-          <p className="text-sm font-medium text-[var(--ink)] leading-snug">
-            {displayTitle}
-            {hasAiData && doc.aiTitle && doc.aiTitle !== doc.documentName && (
-              <span className="ml-2 text-[10px] font-normal text-[var(--muted-foreground)] font-sans">
-                (AI title)
-              </span>
-            )}
-          </p>
-
-          {/* Metadata row */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-            <StatusPill status={doc.status} isAiEnriched={doc.isAiEnriched} />
-
-            {sizeStr && (
-              <span className="text-[11px] text-[var(--muted-foreground)]">{sizeStr}</span>
-            )}
-            {dateStr && (
-              <span className="text-[11px] text-[var(--muted-foreground)]">{dateStr}</span>
-            )}
-            {doc.mimeType && (
-              <span className="text-[11px] text-[var(--muted-foreground)] uppercase">
-                {doc.mimeType.split("/")[1]}
-              </span>
-            )}
-          </div>
-
-          {/* Topic tags */}
-          {topics.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {topics.map((t) => (
-                <span
-                  key={t}
-                  className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-[var(--muted)] text-[var(--muted-foreground)] font-medium"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Hashtags */}
-          {hashtags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-1.5">
-              {hashtags.map((h) => (
-                <span
-                  key={h}
-                  className="inline-flex items-center gap-0.5 text-[10px] text-[var(--primary)] font-medium"
-                >
-                  <Hash size={9} />
-                  {h.replace(/^#/, "")}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Failure error */}
-          {(doc.status === "failed" || localError) && (
-            <div className="flex items-start gap-2 mt-2 text-[11px] text-[var(--failed,#a25a4d)]">
-              <AlertCircle size={12} className="shrink-0 mt-0.5" />
-              <span className="line-clamp-2 text-[var(--muted-foreground)]">
-                {localError || doc.processingError || "AI processing failed."}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Right-side actions */}
-        <div className="flex items-center gap-2 shrink-0 ml-auto pl-2">
-          {/* Expand/collapse AI summary */}
-          {hasExpandable && (
-            <button
-              onClick={() => setIsExpanded((v) => !v)}
-              className="icon-button !w-8 !h-8 !min-w-0 !rounded-lg"
-              title={isExpanded ? "Collapse" : "Show AI summary"}
-            >
-              <Sparkles size={14} className="text-[var(--primary)]" />
-            </button>
-          )}
-
-          {/* Retry AI — only on failed */}
-          {doc.status === "failed" && (
-            <button
-              onClick={handleRetry}
-              disabled={isRetrying}
-              className="button button-light !min-h-0 !py-1 !px-3 text-[11px] flex items-center gap-1 disabled:opacity-50"
-            >
-              {isRetrying ? (
-                <Loader2 size={11} className="animate-spin" />
-              ) : (
-                <RefreshCw size={11} />
-              )}
-              Retry AI
-            </button>
-          )}
-
-          {/* View / Download */}
-          <button
-            onClick={() => window.open(doc.filePath, "_blank")}
-            className="button button-light !min-h-0 !py-1 !px-3 text-[11px] flex items-center gap-1"
-            title="View document"
+        {/* Title + status */}
+        <div className="flex-1 min-w-0 pt-0.5">
+          {/* AI title — serif, prominent */}
+          <h3
+            className="font-serif text-[17px] font-medium text-[var(--ink)] leading-snug tracking-tight"
+            title={displayTitle}
           >
-            <Download size={11} />
-            View
-          </button>
+            {displayTitle}
+          </h3>
 
-          {/* Delete — admin only, two-step confirmation */}
-          {isAdmin && (
-            <button
-              onClick={handleDeleteClick}
-              disabled={isDeleting}
-              title={confirmDelete ? "Click again to confirm delete" : "Delete document"}
-              className={`button !min-h-0 !py-1 !px-3 text-[11px] flex items-center gap-1 transition-all duration-200 disabled:opacity-40 ${
-                confirmDelete
-                  ? "bg-[var(--error)] !border-[var(--error)] text-white hover:opacity-90"
-                  : "button-light text-[var(--error)] hover:bg-[var(--error)] hover:text-white hover:!border-[var(--error)]"
-              }`}
+          {/* Original filename when AI title differs */}
+          {hasAiData && doc.aiTitle && doc.aiTitle !== doc.documentName && (
+            <p
+              className="text-[11px] text-[var(--muted-foreground)] mt-0.5 truncate font-mono"
+              title={doc.documentName}
             >
-              {isDeleting ? (
-                <Loader2 size={11} className="animate-spin" />
-              ) : (
-                <Trash2 size={11} />
-              )}
-              {isDeleting ? "Deleting…" : confirmDelete ? "Confirm" : "Delete"}
-            </button>
+              {doc.documentName}
+            </p>
           )}
+
+          {/* Status badge */}
+          <div className="mt-2.5">
+            <StatusBadge status={doc.status} isAiEnriched={doc.isAiEnriched} />
+          </div>
         </div>
       </div>
 
-      {/* ── Expandable AI Summary panel ── */}
-      {isExpanded && doc.aiSummary && (
-        <div
-          className="w-full mt-3 ml-10 pl-4 border-l-2 border-[var(--border)] animate-in fade-in slide-in-from-top-1 duration-200"
-          style={{ maxWidth: "calc(100% - 2.5rem)" }}
-        >
-          <p className="eyebrow flex items-center gap-1 mb-2">
-            <Sparkles size={10} />
-            AI Summary
+      {/* ── File metadata strip ── */}
+      <div className="px-5 pb-3 flex flex-wrap gap-x-3 gap-y-0.5">
+        {sizeStr && (
+          <span className="text-[11px] text-[var(--muted-foreground)] font-medium">{sizeStr}</span>
+        )}
+        {doc.mimeType && (
+          <span className="text-[11px] text-[var(--muted-foreground)] uppercase font-medium tracking-wide">
+            {doc.mimeType.split("/")[1]}
+          </span>
+        )}
+        {dateStr && (
+          <span className="text-[11px] text-[var(--muted-foreground)]">{dateStr}</span>
+        )}
+      </div>
+
+      {/* ── Topics — numbered list (shown first) ── */}
+      {topics.length > 0 && (
+        <div className="px-5 pb-4">
+          <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--muted-foreground)] mb-3">
+            Key Topics
           </p>
-          <p className="text-[13px] text-[var(--muted-foreground)] leading-relaxed">
-            {doc.aiSummary}
-          </p>
+          <ol className="flex flex-col gap-2">
+            {topics.map((topic, i) => (
+              <li key={topic} className="flex items-center gap-3">
+                <span className="shrink-0 w-[22px] h-[22px] rounded-full text-[var(--ochre-dark)] flex items-center justify-center text-[11px] font-bold" style={{background:'#f0e3c8'}}>
+                  {i + 1}
+                </span>
+                <span className="text-[13px] text-[var(--ink)] font-medium leading-snug">{topic}</span>
+              </li>
+            ))}
+          </ol>
         </div>
       )}
+
+      {/* ── AI Summary — collapsible below topics ── */}
+      {hasAiData && doc.aiSummary && (
+        <div className="px-5 pb-4 border-t border-[var(--border)] pt-3">
+          <button
+            onClick={() => setShowSummary((v) => !v)}
+            className="flex items-center gap-1.5 mb-0 group w-full text-left"
+          >
+            <Sparkles size={12} className="text-[var(--primary)] shrink-0" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--primary)] flex-1">
+              AI Summary
+            </span>
+            <span className="text-[11px] text-[var(--muted-foreground)] group-hover:text-[var(--ink)] transition-colors">
+              {showSummary ? "Hide ↑" : "Show more ↓"}
+            </span>
+          </button>
+
+          {showSummary && (
+            <p className="mt-3 text-[13px] text-[var(--muted-foreground)] leading-[1.75] font-serif">
+              {doc.aiSummary}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* ── Error message ── */}
+      {(localError || doc.processingError) && (
+        <div className="error-banner mx-5 mb-4">
+          <AlertCircle size={13} className="shrink-0 mt-0.5" />
+          <span className="leading-relaxed">
+            {localError || doc.processingError}
+          </span>
+        </div>
+      )}
+
+      {/* ── Actions footer ── */}
+      <div className="mt-auto px-5 py-3 border-t border-[var(--border)] bg-[var(--background)] flex flex-wrap gap-2">
+        {/* View */}
+        <button
+          onClick={() => window.open(doc.filePath, "_blank")}
+          className="button button-dark !min-h-0 !py-2 !px-4 text-sm flex items-center gap-1.5 flex-1 justify-center"
+        >
+          <ExternalLink size={13} />
+          View Document
+        </button>
+
+        {/* Retry AI — only on failed */}
+        {doc.status === "failed" && (
+          <button
+            onClick={handleRetry}
+            disabled={isRetrying}
+            className="button button-light !min-h-0 !py-2 !px-4 text-sm flex items-center gap-1.5 disabled:opacity-50"
+          >
+            {isRetrying ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : (
+              <RefreshCw size={13} />
+            )}
+            {isRetrying ? "Processing…" : "Retry AI"}
+          </button>
+        )}
+
+        {/* Delete — admin only, two-step */}
+        {isAdmin && (
+          <button
+            onClick={handleDeleteClick}
+            disabled={isDeleting}
+            title={confirmDelete ? "Click again to confirm delete" : "Delete document"}
+            className={`button !min-h-0 !py-2 !px-4 text-sm flex items-center gap-1.5 transition-all duration-200 disabled:opacity-40 ${
+              confirmDelete
+                ? "bg-[var(--error)] !border-[var(--error)] text-white"
+                : "button-light !text-[var(--error)]"
+            }`}
+          >
+            {isDeleting ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : (
+              <Trash2 size={13} />
+            )}
+            {isDeleting ? "Deleting…" : confirmDelete ? "Confirm Delete" : "Delete"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

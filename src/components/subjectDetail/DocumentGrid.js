@@ -87,8 +87,8 @@ export default function DocumentGrid({ classId, subjectId, documents, onRefresh,
           </button>
         </div>
       ) : (
-        /* ── Document list ── */
-        <div className="document-list">
+        /* ── Responsive card grid ── */
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {documents.map((doc) => (
             <DocumentCard
               key={doc.id}

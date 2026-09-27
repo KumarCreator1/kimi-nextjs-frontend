@@ -148,7 +148,7 @@ export default function UploadDocumentModal({ classId, subjectId, isOpen, onClos
         <div className="p-6">
           {/* Error banner */}
           {error && (
-            <div className="bg-[var(--error)] bg-opacity-10 text-[var(--error)] p-3 rounded-md text-sm border border-[var(--error)] mb-4 flex items-start gap-2">
+            <div className="error-banner mb-4">
               <AlertCircle size={16} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>

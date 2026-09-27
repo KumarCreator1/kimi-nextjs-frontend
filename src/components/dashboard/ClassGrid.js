@@ -56,7 +56,7 @@ export default function ClassGrid() {
           <div className="w-8 h-8 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : error ? (
-        <div className="bg-[var(--error)] bg-opacity-10 text-[var(--error)] p-4 rounded-xl text-center border border-[var(--error)]">
+        <div className="error-banner text-center">
           {error}
           <div className="mt-2">
             <button

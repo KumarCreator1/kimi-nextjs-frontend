@@ -114,7 +114,7 @@ export default function ClassCard({ classData, index, onRefresh }) {
                         setIsMenuOpen(false);
                         handleDelete();
                       }}
-                      className="w-full text-left px-4 py-2 text-sm text-[var(--error)] hover:bg-[var(--error)] hover:bg-opacity-10 flex items-center gap-2 transition-colors"
+                      className="w-full text-left px-4 py-2 text-sm text-[var(--error)] hover:bg-[var(--error-bg)] flex items-center gap-2 transition-colors"
                     >
                       <Trash2 size={14} /> Delete Class
                     </button>
@@ -126,7 +126,7 @@ export default function ClassCard({ classData, index, onRefresh }) {
                       setIsMenuOpen(false);
                       handleLeave();
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-[var(--error)] hover:bg-[var(--error)] hover:bg-opacity-10 flex items-center gap-2 transition-colors"
+                    className="w-full text-left px-4 py-2 text-sm text-[var(--error)] hover:bg-[var(--error-bg)] flex items-center gap-2 transition-colors"
                   >
                     <LogOut size={14} /> Leave Class
                   </button>

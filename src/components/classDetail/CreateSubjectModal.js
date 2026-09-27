@@ -65,7 +65,7 @@ export default function CreateSubjectModal({ classId, isOpen, onClose, onSuccess
 
         <div className="p-6">
           {error && (
-            <div className="bg-[var(--error)] bg-opacity-10 text-[var(--error)] p-3 rounded-md text-sm border border-[var(--error)] mb-4">
+            <div className="error-banner mb-4">
               {error}
             </div>
           )}

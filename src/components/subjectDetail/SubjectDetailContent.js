@@ -48,7 +48,7 @@ export default function SubjectDetailContent({ classId, subjectId }) {
   if (error) {
     return (
       <main className="flex-1 main-content w-full py-12">
-        <div className="bg-[var(--error)] bg-opacity-10 text-[var(--error)] p-4 rounded-xl text-center border border-[var(--error)] max-w-lg mx-auto">
+        <div className="error-banner text-center max-w-lg mx-auto">
           <p>{error}</p>
           <button onClick={fetchData} className="button button-light !min-h-0 !py-1 !px-3 text-sm mt-4">Retry</button>
         </div>
