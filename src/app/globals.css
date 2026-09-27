@@ -11,7 +11,13 @@
   --muted-foreground: #77716a;
   --border: #ddd6ca;
   --sage: #dce5d8;
+  --sage-dark: #617359;
   --ochre: #eadbbd;
+  --ochre-dark: #967c43;
+  --error: #a25a4d;
+  /* Derived error surface colors — proper alpha without bg-opacity hacks */
+  --error-bg: #f7eae8;
+  --error-border: #d9a49c;
   --ink: #292725;
   --radius: 9px;
 }
@@ -29,6 +35,32 @@
   --radius-sm: 6px;
   --radius-md: 9px;
   --radius-lg: 12px;
+}
+/* ── Reusable error banner \u2014 bg-opacity hacks are broken in Tailwind v4 \u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014 */
+.error-banner {
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.error-banner svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  width: 15px;
+  height: 15px;
+}
+/* Inline field error text */
+.field-error {
+  color: var(--error);
+  font-size: 11px;
+  margin-top: 4px;
+  display: block;
 }
 * {
   box-sizing: border-box;

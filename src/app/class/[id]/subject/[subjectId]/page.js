@@ -2,10 +2,10 @@ import TopBar from "@/components/TopBar";
 import { ArrowLeft, Settings } from "lucide-react";
 import Link from "next/link";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import ClassDetailContent from "@/components/classDetail/ClassDetailContent";
+import SubjectDetailContent from "@/components/subjectDetail/SubjectDetailContent";
 
-export default async function ClassDetailPage({ params }) {
-  const { id } = await params;
+export default async function SubjectDetailPage({ params }) {
+  const { id, subjectId } = await params;
 
   return (
     <ProtectedRoute>
@@ -16,13 +16,13 @@ export default async function ClassDetailPage({ params }) {
           <div className="max-w-7xl mx-auto px-6 lg:px-16 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
-                href="/dashboard"
+                href={`/class/${id}`}
                 className="back-button !mb-0 p-2 hover:bg-[var(--muted)] rounded-full transition-colors"
               >
                 <ArrowLeft size={20} />
               </Link>
               <h2 className="text-2xl font-serif text-[var(--primary)] m-0">
-                Class details
+                Subject Details
               </h2>
             </div>
             <button className="icon-button">
@@ -31,7 +31,7 @@ export default async function ClassDetailPage({ params }) {
           </div>
         </div>
 
-        <ClassDetailContent classId={id} />
+        <SubjectDetailContent classId={id} subjectId={subjectId} />
       </div>
     </ProtectedRoute>
   );

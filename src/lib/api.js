@@ -46,3 +46,30 @@ export const classApi = {
   removeMember: (classId, memberId) =>
     api.delete(`/class/${classId}/member/${memberId}`),
 };
+
+export const subjectApi = {
+  createSubject: (classId, subjectData) => api.post(`/class/${classId}/subject`, subjectData),
+  listSubjects: (classId) => api.get(`/class/${classId}/subject`),
+  getSubjectDetail: (classId, subjectId) => api.get(`/class/${classId}/subject/${subjectId}`),
+  updateSubject: (classId, subjectId, subjectData) => api.patch(`/class/${classId}/subject/${subjectId}`, subjectData),
+  deleteSubject: (classId, subjectId) => api.delete(`/class/${classId}/subject/${subjectId}`)
+};
+
+export const documentApi = {
+  uploadDocument: (classId, subjectId, data) => 
+    api.post(`/class/${classId}/subject/${subjectId}/document`, data),
+  listDocuments: (classId, subjectId) => 
+    api.get(`/class/${classId}/subject/${subjectId}/document?subjectId=${subjectId}`),
+  getDocumentDetail: (classId, subjectId, documentId) => 
+    api.get(`/class/${classId}/subject/${subjectId}/document/${documentId}`),
+  getDocumentViewData: (classId, subjectId, documentId) => 
+    api.get(`/class/${classId}/subject/${subjectId}/document/${documentId}/view`),
+  downloadDocument: (classId, subjectId, documentId) => 
+    api.get(`/class/${classId}/subject/${subjectId}/document/${documentId}/download`),
+  checkConversionStatus: (classId, subjectId, documentId) => 
+    api.get(`/class/${classId}/subject/${subjectId}/document/${documentId}/sync`),
+  enrichDocument: (classId, subjectId, documentId) => 
+    api.post(`/class/${classId}/subject/${subjectId}/document/${documentId}/enrich`),
+  deleteDocument: (classId, subjectId, documentId) =>
+    api.delete(`/class/${classId}/subject/${subjectId}/document/${documentId}`),
+};

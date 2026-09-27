@@ -36,7 +36,7 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {error && (
-        <div className="bg-[var(--error)] bg-opacity-10 text-[var(--error)] p-3 rounded-md text-sm border border-[var(--error)]">
+        <div className="error-banner">
           {error}
         </div>
       )}
