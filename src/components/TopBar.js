@@ -1,7 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import { BookOpen, Bell, Search, User } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function TopBar() {
+  const { user } = useAuth();
+
+  // Compute initials client-side per backend handoff spec.
+  // lastName is nullable — filter(Boolean) drops it gracefully.
+  const initials = [user?.firstName?.[0], user?.lastName?.[0]]
+    .filter(Boolean)
+    .join("")
+    .toUpperCase();
+
   return (
     <div className="topbar">
       <Link href="/dashboard" className="brand flex-shrink-0">
@@ -27,8 +39,9 @@ export default function TopBar() {
         <Link
           href="/profile"
           className="avatar hover:opacity-80 transition-opacity ml-2"
+          aria-label="Go to profile"
         >
-          JD
+          {initials || <User size={14} />}
         </Link>
       </div>
 

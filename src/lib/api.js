@@ -34,6 +34,12 @@ export const authApi = {
   getCurrentUser: () => api.get("/user/me"),
 };
 
+// Profile page data — identity + enrolled classes.
+// Call this ONLY from the /profile page, never from AuthContext.
+export const profileApi = {
+  getProfile: () => api.get("/user/profile"),
+};
+
 export const classApi = {
   getUserClasses: () => api.get("/class"),
   createClass: (classData) => api.post("/class", classData),

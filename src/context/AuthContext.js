@@ -4,37 +4,45 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { authApi } from "@/lib/api";
 import { useRouter, usePathname } from "next/navigation";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // `isLoading` stays true until the single boot-time /me call resolves.
+  // Components read this to avoid a flash-redirect while auth is unknown.
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
 
+  // Called ONCE on app mount — empty dep array is intentional.
+  // /me must NOT fire on every navigation; user lives in context memory after this.
   useEffect(() => {
-    const checkUser = async () => {
+    async function fetchMe() {
       try {
         const res = await authApi.getCurrentUser();
-        // user.controller.js returns { data: { user: userData } } inside ApiResponse
         setUser(res.data?.user || null);
-      } catch (error) {
+      } catch {
         setUser(null);
-        // Redirect to login if on protected route (dashboard, class, etc.)
-        if (
-          pathname.startsWith("/dashboard") ||
-          pathname.startsWith("/class") ||
-          pathname.startsWith("/subject")
-        ) {
-          router.push("/login");
-        }
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
-    };
+    }
+    fetchMe();
+  }, []); // ← intentionally empty — runs once on mount only
 
-    checkUser();
-  }, [pathname, router]);
+  // Redirect unauthenticated users away from protected routes.
+  // We wait until isLoading resolves so we don't redirect before the /me response.
+  useEffect(() => {
+    if (isLoading) return;
+    const protected_ =
+      pathname.startsWith("/dashboard") ||
+      pathname.startsWith("/class") ||
+      pathname.startsWith("/subject") ||
+      pathname.startsWith("/profile");
+    if (!user && protected_) {
+      router.push("/login");
+    }
+  }, [isLoading, user, pathname, router]);
 
   const login = async (credentials) => {
     const res = await authApi.login(credentials);
@@ -56,8 +64,12 @@ export function AuthProvider({ children }) {
     router.push("/login");
   };
 
+  // Expose `isLoading` (not the old `loading`) to match the backend handoff spec.
+  // Also keep `loading` as an alias so existing consumers don't break.
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, setUser, isLoading, loading: isLoading, login, register, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -65,7 +77,7 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
